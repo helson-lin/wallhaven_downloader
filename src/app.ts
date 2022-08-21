@@ -91,7 +91,7 @@ const downloadImage = async (promiseList: Promise<any>[], urlList: ImageInfo[], 
  * @param start 起始页码
  * @param end 结束页码
  */
-const getWallHavenImageWidthPages = (options: HavenOptions, start: number, end: number): Promise<boolean | void> => {
+const getWallHavenImageWidthPages = (options: HavenOptions, start: number, end: number, namePath?: string): Promise<boolean | void> => {
     const params = Object.entries(options).reduce((pre, keyValues) => {
         if (!pre) {
             return pre += `https://wallhaven.cc/search?${keyValues[0]}=${keyValues[1]}`
@@ -99,7 +99,7 @@ const getWallHavenImageWidthPages = (options: HavenOptions, start: number, end: 
             return pre += `&${keyValues[0]}=${keyValues[1]}`
         }
     }, "")
-    const downloadPath = Object.values(options).sort().join("/");
+    const downloadPath = namePath || Object.values(options).sort().join("/");
     const promises = [];
     // 请求所有页面的数据
     for (let i = start; i <= end; i++) {
@@ -120,7 +120,7 @@ const getWallHavenImageWidthPages = (options: HavenOptions, start: number, end: 
         const downloadFullUrls = urlsList.map((item: ImageInfo) => item.fullUrl);
         const pathDir = path.join(process.cwd(), `../imgs/full/${downloadPath}`)
         return downloadImage(
-            downloadFullUrls.map((url: string) => download(url, pathDir).catch((err: Error) => console.log("DOWNLOAD ERROR: \n" + err))),
+            downloadFullUrls.map((url: string) => download(url, pathDir).catch((err: Error) => {} /* console.log("DOWNLOAD ERROR: \n" + err) */ )),
             urls,
             "Full-IMG").then(() => {
                 console.log("------------FININSHED-----------")
@@ -162,6 +162,6 @@ async function askStuff() {
         purity: "100",
     };
     console.log('You chose:\n', `类型: ${type}; 尺寸: ${atleast}; 分类: ${sorting}; 排序: ${order}`, "开始下载");
-    await getWallHavenImageWidthPages(params, Number(startPage), Number(endPage));
+    await getWallHavenImageWidthPages(params, Number(startPage), Number(endPage), `${type}/${atleast}/${sorting}`);
 }
 askStuff();
